@@ -181,3 +181,19 @@ def manual_check_data(data: dict) -> None:
     for n, column_name in enumerate(list(output_row.columns)):
         print(f"{column_name}: {output_values[0][n]}")
     print("[DEBUG] End of manual data check, you can compare these values with what is in the powerpoint")
+
+def remove_faulty(data: dict, variable):
+    list = data["Output"][variable]
+    data_amount = len(list)
+    use = list.sort_values(ascending = True)
+    data_amount_quart = data_amount / 4
+    IQR = use[3*data_amount_quart] - use[data_amount_quart]
+    whisker = 1.5 * IQR #To keep more values put 2*IQR or something else
+    acceptable_min = use[data_amount_quart] - whisker
+    acceptable_max = use[3*data_amount_quart] + whisker
+
+
+    data["Input"].drop(data["Output"][data['Output'][variable] >= acceptable_max].index, inplace = True)
+    data["Input"].drop(data["Output"][data['Output'][variable] <= acceptable_min].index, inplace = True)
+    data["Output"].drop(data["Output"][data['Output'][variable] >= acceptable_max].index, inplace = True)
+    data["Output"].drop(data["Output"][data['Output'][variable] <= acceptable_min].index, inplace = True)
